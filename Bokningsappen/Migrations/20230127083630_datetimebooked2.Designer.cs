@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Bokningsappen.Migrations
 {
     [DbContext(typeof(BokingAppContext))]
-    [Migration("20230126203129_popularity")]
-    partial class popularity
+    [Migration("20230127083630_datetimebooked2")]
+    partial class datetimebooked2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -59,6 +59,9 @@ namespace Bokningsappen.Migrations
                     b.Property<bool>("Booked")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("BookedDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
 
@@ -75,40 +78,6 @@ namespace Bokningsappen.Migrations
                     b.HasKey("ID");
 
                     b.ToTable("Rooms");
-                });
-
-            modelBuilder.Entity("Bokningsappen.Models.User", b =>
-                {
-                    b.Property<int>("ID")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ID"), 1L, 1);
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("UserID")
-                        .HasColumnType("int");
-
-                    b.HasKey("ID");
-
-                    b.HasIndex("UserID");
-
-                    b.ToTable("Users");
-                });
-
-            modelBuilder.Entity("Bokningsappen.Models.User", b =>
-                {
-                    b.HasOne("Bokningsappen.Models.User", null)
-                        .WithMany("Users")
-                        .HasForeignKey("UserID");
-                });
-
-            modelBuilder.Entity("Bokningsappen.Models.User", b =>
-                {
-                    b.Navigation("Users");
                 });
 #pragma warning restore 612, 618
         }

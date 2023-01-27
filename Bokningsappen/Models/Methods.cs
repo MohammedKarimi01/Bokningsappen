@@ -1,18 +1,7 @@
-﻿using Bokningsappen.Migrations;
-using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Bokningsappen.Models
+﻿namespace Bokningsappen.Models
 {
     public class Methods
     {
-        //Två saker kvar att göra.
-        //1. Fixa så att admin inlogg funkar som den ska.
-        //2. Fixa vecko schema så att man kan boka rum mellan v1-v52
         enum MainMenu
         {
             Show_Rooms = 1,
@@ -53,44 +42,45 @@ namespace Bokningsappen.Models
                     BookRoom();
                     break;
                 case MainMenu.Trending_Rooms:
+                    ShowTrendingRooms();
                     break;
                 case MainMenu.Admin:
                     Admin();
                     //AdminCheck();
-                    //Admin();
                     break;
             }
         }
-        public static void AdminCheck()
-        {
-            var db = new BokingAppContext();
+        //Login funkar om man skriver rätt inlogg, men funkar ej när man skriver fel.
+        //public static void AdminCheck()
+        //{
+        //    var db = new BokingAppContext();
 
-            Console.WriteLine("Verify you self, intruder!!");
+        //    Console.WriteLine("Verify you self, intruder!!");
             
-            Console.Write("Username: ");
-            string username = Console.ReadLine();
-            Console.Write("Password: ");
-            string password = Console.ReadLine();
+        //    Console.Write("Username: ");
+        //    string username = Console.ReadLine();
+        //    Console.Write("Password: ");
+        //    string password = Console.ReadLine();
 
 
-            var AdminP = db.Admins.Where(p => p.Password == password).FirstOrDefault();    
-            var AdminU = db.Admins.Where(u => u.UserName == username).FirstOrDefault();
+        //    var AdminP = db.Admins.Where(p => p.Password == password).SingleOrDefault();    
+        //    var AdminU = db.Admins.Where(u => u.UserName == username).SingleOrDefault();
 
 
-            if(username == AdminU.UserName && password == AdminP.Password)
-            {
-                Console.WriteLine("Correct information as given, you will be directed to the admin menu");
-                Thread.Sleep(2000);
-                Admin();
-            }
-            else if (username != AdminU.UserName || password != AdminP.Password)
-            {
-                Console.WriteLine("That is not the correct username or password, try again looser!");
-                Thread.Sleep(2000);
-                AdminCheck();
-            }
+        //    if(username == AdminU.UserName && password == AdminP.Password)
+        //    {
+        //        Console.WriteLine("Correct information as given, you will be directed to the admin menu");
+        //        Thread.Sleep(2000);
+        //        Admin();
+        //    }
+        //    else if (username != AdminU.UserName || password != AdminP.Password)
+        //    {
+        //        Console.WriteLine("That is not the correct username or password, try again looser!");
+        //        Thread.Sleep(2000);
+        //        AdminCheck();
+        //    }
 
-        }
+        //}
         public static void Admin()
         {
             var db = new BokingAppContext();
@@ -143,10 +133,10 @@ namespace Bokningsappen.Models
             //while (run == true)
             //{
                 var db = new BokingAppContext();
-                Console.WriteLine("[RoomID]" + $"\t" + "[RoomName]" + $"\t" + "[Status]");
+                Console.WriteLine("[RoomID]" + $"\t" + "[RoomName]" + $"\t" + "[RoomSize]" +  $"\t" + "[Status]");
                 foreach (var room in db.Rooms)
                 {
-                    Console.WriteLine(room.ID + $"\t\t" + room.RoomName + "\t\t" + room.Booked);
+                    Console.WriteLine(room.ID + "\t\t" + room.RoomName + "\t\t" + room.RoomSize + "\t\t" + room.Booked);
                 }
 
                 Console.WriteLine("Press X to go back to the menu");
@@ -165,10 +155,10 @@ namespace Bokningsappen.Models
         public static void ShowAllRooms()
         {
             var db = new BokingAppContext();
-            Console.WriteLine("[RoomID]" + $"\t" + "[RoomName]" + $"\t" + "[Status]");
-            foreach (var kek in db.Rooms)
+            Console.WriteLine("[RoomID]" + $"\t" + "[RoomName]" + $"\t" + "[RoomSize]" + $"\t" + "[Status]");
+            foreach (var room in db.Rooms)
             {
-                Console.WriteLine(kek.ID + $"\t\t" + kek.RoomName + "\t\t" + kek.Booked);
+                Console.WriteLine(room.ID + "\t\t" + room.RoomName + "\t\t" + room.RoomSize + "\t\t" + room.Booked);
             }
         }
         public static void BookRoom()
@@ -180,6 +170,8 @@ namespace Bokningsappen.Models
             Console.WriteLine("What room would you like to book?");
 
             string userinput = Console.ReadLine();
+
+
             int roomId;
             bool UpdateBookedStatus = true;
 
@@ -200,6 +192,7 @@ namespace Bokningsappen.Models
                     FindRoom.ID= roomId;
                     FindRoom.Booked = UpdateBookedStatus;
                     FindRoom.popularity++;
+                    FindRoom.BookedDate = DateTime.Now;
 
                     db.SaveChanges();
                     Console.WriteLine($"You have successfully booked room {FindRoom.RoomName} under the name {FindRoom.Name}");
@@ -284,14 +277,26 @@ namespace Bokningsappen.Models
             Console.WriteLine("What room would you like to cancel? [Enter RoomID]");
             var ChosenRoomID = int.Parse(Console.ReadLine());
 
+       
             var ChosenRoom = db.Rooms.Where(r => r.ID == ChosenRoomID).FirstOrDefault();
+            if (ChosenRoom.Booked == true)
+            {
+                ChosenRoom.Name = null;
+                ChosenRoom.Booked = false;
+                ChosenRoom.BookedDate = null;
+                db.SaveChanges();
 
-            ChosenRoom.Name = null;
-            ChosenRoom.Booked = false;
-            db.SaveChanges();
-
-            Console.WriteLine($"You have successfully canceld {ChosenRoom.RoomName}");
-            Thread.Sleep(2000);
+                Console.WriteLine($"You have successfully canceld {ChosenRoom.RoomName}");
+                Thread.Sleep(2000);
+                RunMe();
+            }
+            else if (ChosenRoom.Booked == false)
+            {
+                Console.WriteLine("This room isnt booked, please try and cancel a already booked room!");
+                Thread.Sleep(2000);
+                CancelRoomAdmin();
+            }
+          
             Admin();
         }
         public static void AddAdmin()
@@ -309,43 +314,34 @@ namespace Bokningsappen.Models
             db.Admins.Add(a);
             db.SaveChanges();
         }
-        //public static void CreateNewEntries(int roomid, string veckodag, int veckonummer, bool tillgänglig)
-        //{
-        //    using (var db = new MyDBContext())
-        //    {
-        //        var nybokning = new Bokning()
-        //        {
-        //            RumId = RumId,
-        //            Veckodag = veckodag,
-        //            Veckonummer = veckonummer,
-        //            Tillgänglig = tillgänglig
-        //        };
-        //        var bokningar = db.Bokningar;
-        //        bokningar.Add(nybokning);
-        //        db.SaveChanges();
-        //    }
-        //}
-        public static void CreateNewEntries()
-        {
-            var db = new BokingAppContext();
-            var newBooking = new 
-        }
-        //public static void LäggTillRumIKalendern()
-        //{
-        //    Console.WriteLine("AngeRumId");
-        //    int rumId = int.Parse(Console.ReadLine());
-        //    for (int i = 1; i <= 52; i++) //veckonummer
-        //    {
-        //        CreateNewEntries(rumId, "Måndag", i, true);
-        //        CreateNewEntries(rumId, "Tisdag", i, true);
-        //        CreateNewEntries(rumId, "Onsdag", i, true);
-        //        CreateNewEntries(rumId, "Torsdag", i, true);
-        //        CreateNewEntries(rumId, "Fredag", i, true);
-        //    }
-        //}
         public static void ShowTrendingRooms()
         {
+            var db = new BokingAppContext();
+            Console.Clear();
+            var PopRoom = (from p in db.Rooms
+                           where p.popularity >= 0
+                           orderby p.popularity descending
+                           select p);
 
+            Console.WriteLine("[Popularity]" + $"\t" + "[RoomName]" + $"\t" + "[RoomSize]" + $"\t" + "[Status]");
+            foreach (var room in PopRoom)
+            {
+                Console.WriteLine(room.popularity + "\t\t" + room.RoomName + "\t\t" + room.RoomSize + "\t\t" + room.Booked);
+            }
+            Console.WriteLine("Press X if you want to go back to the main menu");
+
+            string UserInput = Console.ReadLine();
+
+            if (UserInput == "X" || UserInput == "x")
+            {
+                RunMe();
+            }
+            else
+            {
+                Console.WriteLine("Please enter a vaild key");
+                Thread.Sleep(2000);
+                ShowTrendingRooms();
+            }
         }
     }
 }

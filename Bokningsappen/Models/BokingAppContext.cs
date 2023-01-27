@@ -11,7 +11,6 @@ namespace Bokningsappen.Models
 {
     public class BokingAppContext : DbContext
     {
-        public DbSet<User> Users { get; set; }
         public DbSet<Room> Rooms { get; set; }
         public DbSet<Admin> Admins { get; set; }
 

@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace Bokningsappen.Migrations
 {
-    public partial class popularity : Migration
+    public partial class datetimebooked2 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -33,36 +34,13 @@ namespace Bokningsappen.Migrations
                     RoomSize = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Booked = table.Column<bool>(type: "bit", nullable: false),
+                    BookedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     popularity = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Rooms", x => x.ID);
                 });
-
-            migrationBuilder.CreateTable(
-                name: "Users",
-                columns: table => new
-                {
-                    ID = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserID = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Users", x => x.ID);
-                    table.ForeignKey(
-                        name: "FK_Users_Users_UserID",
-                        column: x => x.UserID,
-                        principalTable: "Users",
-                        principalColumn: "ID");
-                });
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Users_UserID",
-                table: "Users",
-                column: "UserID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -72,9 +50,6 @@ namespace Bokningsappen.Migrations
 
             migrationBuilder.DropTable(
                 name: "Rooms");
-
-            migrationBuilder.DropTable(
-                name: "Users");
         }
     }
 }

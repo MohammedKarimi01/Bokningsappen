@@ -13,6 +13,7 @@ namespace Bokningsappen.Models
         public int RoomSize { get; set; }
         public string? Name { get; set; }
         public bool Booked { get; set; }
+        public DateTime? BookedDate { get; set; }
         public int popularity { get; set; }
 
 
